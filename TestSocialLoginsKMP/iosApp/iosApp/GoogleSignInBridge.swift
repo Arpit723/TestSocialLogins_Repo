@@ -4,7 +4,11 @@ import Shared
 
 final class GoogleSignInBridgeImpl: GoogleSignInBridge {
 
-    func signIn(onSuccess: @escaping (GoogleSignInTokens) -> Void, onError: @escaping (String) -> Void) {
+    func signIn(
+        onSuccess: @escaping (GoogleSignInTokens) -> Void,
+        onError: @escaping (String) -> Void,
+        onCancel: @escaping () -> Void
+    ) {
         guard let clientID = FirebaseApp.app()?.options.clientID else {
             onError("Firebase client ID missing; check GoogleService-Info.plist")
             return
@@ -17,7 +21,11 @@ final class GoogleSignInBridgeImpl: GoogleSignInBridge {
         GIDSignIn.sharedInstance.configuration = config
         GIDSignIn.sharedInstance.signIn(withPresenting: presenting) { signInResult, error in
             if let error {
-                onError(error.localizedDescription)
+                if let gidError = error as? GIDSignInError, gidError.code == .canceled {
+                    onCancel()
+                } else {
+                    onError(error.localizedDescription)
+                }
                 return
             }
             guard let user = signInResult?.user, let idToken = user.idToken?.tokenString else {
@@ -26,6 +34,10 @@ final class GoogleSignInBridgeImpl: GoogleSignInBridge {
             }
             onSuccess(GoogleSignInTokens(idToken: idToken, accessToken: user.accessToken.tokenString))
         }
+    }
+
+    func cancel() {
+        topViewController()?.dismiss(animated: true)
     }
 
     func signOut() {

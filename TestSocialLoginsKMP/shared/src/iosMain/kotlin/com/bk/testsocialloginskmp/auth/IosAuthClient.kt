@@ -24,7 +24,8 @@ class GoogleSignInTokens(
 
 /** Implemented on the Swift side with GIDSignIn and registered from iOSApp.init. */
 interface GoogleSignInBridge {
-    fun signIn(onSuccess: (GoogleSignInTokens) -> Unit, onError: (String) -> Unit)
+    fun signIn(onSuccess: (GoogleSignInTokens) -> Unit, onError: (String) -> Unit, onCancel: () -> Unit)
+    fun cancel()
     fun signOut()
 }
 
@@ -42,15 +43,14 @@ class IosAuthClient : AuthClient {
     override val currentUser: StateFlow<AppUser?> =
         Firebase.auth.authStateChanged
             .map { it?.toAppUser() }
-            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), null)
+            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), Firebase.auth.currentUser?.toAppUser())
 
-    override suspend fun signInWithGoogle(): AppUser? {
+    override suspend fun signInWithGoogle() {
         val bridge = GoogleSignInBridgeHolder.bridge
             ?: throw IllegalStateException("GoogleSignInBridge not registered; call GoogleSignInBridgeHolder.shared.bridge from iOSApp.init")
         val tokens = bridge.awaitTokens()
         val credential = GoogleAuthProvider.credential(idToken = tokens.idToken, accessToken = tokens.accessToken)
-        val result = Firebase.auth.signInWithCredential(credential)
-        return result.user?.toAppUser()
+        Firebase.auth.signInWithCredential(credential)
     }
 
     override suspend fun signOut() {
@@ -63,7 +63,9 @@ class IosAuthClient : AuthClient {
             signIn(
                 onSuccess = { cont.resume(it) },
                 onError = { cont.resumeWith(Result.failure(RuntimeException(it))) },
+                onCancel = { cont.resumeWith(Result.failure(SignInCancelledException())) },
             )
+            cont.invokeOnCancellation { cancel() }
         }
 
     private fun FirebaseUser.toAppUser() = AppUser(

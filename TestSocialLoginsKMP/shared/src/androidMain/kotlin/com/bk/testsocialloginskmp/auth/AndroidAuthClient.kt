@@ -5,6 +5,7 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -36,9 +37,9 @@ private class AndroidAuthClient : AuthClient {
     override val currentUser: StateFlow<AppUser?> =
         Firebase.auth.authStateChanged
             .map { it?.toAppUser() }
-            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), null)
+            .stateIn(scope, SharingStarted.WhileSubscribed(5_000), Firebase.auth.currentUser?.toAppUser())
 
-    override suspend fun signInWithGoogle(): AppUser? {
+    override suspend fun signInWithGoogle() {
         val activity = AndroidAuthHost.activity
         Log.i(TAG, "signInWithGoogle: started")
         logPlayServicesState()
@@ -69,9 +70,11 @@ private class AndroidAuthClient : AuthClient {
             Log.i(TAG, "signInWithGoogle: Google ID token received (length=${idToken.length}), signing in to Firebase")
 
             val firebaseCredential = GoogleAuthProvider.credential(idToken, null)
-            val result = Firebase.auth.signInWithCredential(firebaseCredential)
-            Log.i(TAG, "signInWithGoogle: Firebase sign-in succeeded, uid=${result.user?.uid}")
-            return result.user?.toAppUser()
+            Firebase.auth.signInWithCredential(firebaseCredential)
+            Log.i(TAG, "signInWithGoogle: Firebase sign-in succeeded, uid=${Firebase.auth.currentUser?.uid}")
+        } catch (e: GetCredentialCancellationException) {
+            Log.i(TAG, "signInWithGoogle: user dismissed the credential picker")
+            throw SignInCancelledException()
         } catch (e: GetCredentialException) {
             Log.e(
                 TAG,

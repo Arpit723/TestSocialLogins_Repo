@@ -37,6 +37,8 @@ class AuthViewModel : ViewModel() {
                 client.signInWithGoogle()
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: SignInCancelledException) {
+                // User dismissed the sign-in sheet; not an error.
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = e.message ?: e.toString()) }
             } finally {

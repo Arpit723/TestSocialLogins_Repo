@@ -9,10 +9,13 @@ data class AppUser(
     val photoUrl: String?,
 )
 
+/** Thrown when the user deliberately dismisses the sign-in sheet; not an error to surface. */
+class SignInCancelledException : Exception("Sign-in cancelled by user")
+
 interface AuthClient {
     val isSupported: Boolean
     val currentUser: StateFlow<AppUser?>
-    suspend fun signInWithGoogle(): AppUser?
+    suspend fun signInWithGoogle()
     suspend fun signOut()
 }
 
