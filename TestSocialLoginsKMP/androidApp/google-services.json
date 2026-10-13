@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1005594799220",
+    "project_id": "test-social-logins-kmp",
+    "storage_bucket": "test-social-logins-kmp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005594799220:android:bf31b2727307172bd5f521",
+        "android_client_info": {
+          "package_name": "com.bk.testsocialloginskmp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1005594799220-9n3rgch7n8n65jd2th33l2ium4rv4oji.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bk.testsocialloginskmp",
+            "certificate_hash": "b98c0102dba54ffd61d2a35f997d816d86826ce5"
+          }
+        },
+        {
+          "client_id": "1005594799220-uauk02l1bgf9glh5oat7c1rjvu5mdvn0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1G8nQWjKguq_-gyj336VO4B2Z8SFz7vQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1005594799220-uauk02l1bgf9glh5oat7c1rjvu5mdvn0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

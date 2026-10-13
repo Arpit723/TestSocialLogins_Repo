@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "TestSocialLoginsKMP",
+        "supportEmail": "arpit723@gmail.com"
+      }
+    }
+  }
+}
